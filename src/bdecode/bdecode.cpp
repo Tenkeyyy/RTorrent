@@ -1,4 +1,5 @@
 #include <cstdlib>
+#include <ostream>
 #include <string>
 #include <iostream>
 #include <map>
@@ -15,7 +16,7 @@ bool isnum(char c) {
 
 #define BENCODE_ERR -1
 
-std::string bdecs(std::string s, size_t *pos) {
+std::string bdecs(const std::string& s, size_t *pos) {
 	std::string chars = "";
 	size_t i = *pos;
 	while(s[i] != ':') {
@@ -38,7 +39,7 @@ std::string bdecs(std::string s, size_t *pos) {
 	return res;
 }
 
-int bdeci(std::string s, size_t *pos) {
+int bdeci(const std::string& s, size_t *pos) {
 	std::string nums = "";
 	size_t i = *pos + 1;
 	while(s[i] != 'e') {
@@ -59,89 +60,72 @@ int bdeci(std::string s, size_t *pos) {
 	return std::stoi(nums);
 }
 
-void insert_int(std::vector<l_item> *dest, std::string s, size_t *pos) {
+void insert_int(std::vector<l_item> *dest, const std::string& s, size_t *pos) {
 	l_item item;
 	item.type = 'i';
-	int *ptr = (int *) malloc(sizeof(int));
 	int temp = bdeci(s,pos);
-	*ptr = temp;
-	item.data =  *ptr;
+	item.data =  temp;
 	(*dest).push_back(item);
 }
 
-l_item insert_int(dict *d, l_item *i, std::string s, size_t *pos) {
+l_item insert_int(dict *d, l_item *i, const std::string& s, size_t *pos) {
 	l_item item;
 	item.type = 'i';
-	int *ptr = (int *) malloc(sizeof(int));
 	int temp = bdeci(s,pos);
-	dict res = *d;
-	*ptr = temp;
-	item.data = *ptr;
-	if(i == NULL)
-		res[item] = item;
+	item.data = temp;
+	if(i == nullptr)
+		(*d)[item] = item;
 	else {
-		res[*i] = item;
+		(*d)[*i] = item;
 		*i = item;
 	}
-	*d = res;
 	return item;
 }
 
-void insert_string(std::vector<l_item> *dest, std::string s, size_t *pos) {
+void insert_string(std::vector<l_item> *dest, const std::string& s, size_t *pos) {
 	l_item item;
 	item.type = 's';
-	std::string *data = (std::string *) malloc(sizeof(std::string));
 	std::string temp = bdecs(s,pos);
-	*data = temp;
-	item.data = *data;
+	item.data = temp;
 	(*dest).push_back(item);
 }
 
-l_item insert_string(dict *d, l_item *i, std::string s, size_t *pos) {
+l_item insert_string(dict *d, l_item *i, const std::string& s, size_t *pos) {
 	l_item item;
 	item.type = 's';
-	std::string *ptr = (std::string *) malloc(sizeof(std::string));
 	std::string temp = bdecs(s,pos);
-	dict res = *d;
-	*ptr = temp;
-	item.data = *ptr;
-	if(i == NULL)
-		res[item] = item;
+	item.data = temp;
+	if(i == nullptr)
+		(*d)[item] = item;
 	else {
-		res[*i] = item;
+		(*d)[*i] = item;
 		*i = item;
+		std::cout << "Inserted a value\n";
 	}
-	*d = res;
 	return item;
 }
 
-l_item insert_list(dict*d, l_item *i, std::string s, size_t *pos) {
-	dict res = *d;
+l_item insert_list(dict*d, l_item *i, const std::string& s, size_t *pos) {
 	l_item item;
 	item.type = 'l';
-	std::vector<l_item> *list = (std::vector<l_item> *) malloc(sizeof(std::vector<l_item>));
-	*list = bdecl(s,pos);
-	item.data =  *list;
-	if(i == NULL)
-		res[item] = item;
+	item.data = bdecl(s,pos);
+	if(i == nullptr)
+		(*d)[item] = item;
 	else {
-		res[*i] = item;
+		(*d)[*i] = item;
 		*i = item;
 	}
-	*d = res;
 	return item;
 }
 
-std::vector<l_item> bdecl(std::string s, size_t *pos) {
+std::vector<l_item> bdecl(const std::string& s, size_t *pos) {
 	size_t i = *pos + 1;
 	std::vector<l_item> res;
 	l_item item;
 
 	while(s[i] != 'e') {
 		if(s[i] == 'l') {
-			std::vector<l_item> *list = (std::vector<l_item> *) malloc(sizeof(std::vector<l_item>));
-			*list = bdecl(s,&i);
-			item.data =  *list;
+			item.data =  bdecl(s,&i);
 			item.type = 'l';
 			res.push_back(item);
 		}
@@ -158,7 +142,21 @@ std::vector<l_item> bdecl(std::string s, size_t *pos) {
 	return res;
 }
 
-dict bdecd(std::string s, size_t *pos) {
+l_item insert_dict(dict*d, l_item *i, const std::string& s, size_t *pos) {
+	l_item item;
+	item.type = 'd';
+	item.data = bdecd(s,pos);
+	if(i == nullptr)
+		(*d)[item] = item;
+	else {
+		l_item curr = *i;
+		(*d)[curr] = item;
+	}
+	*i = item;
+	return item;
+}
+
+dict bdecd(const std::string& s, size_t *pos) {
 	size_t i = *pos + 1;
 	dict res;
 	l_item item, curr;
@@ -166,7 +164,7 @@ dict bdecd(std::string s, size_t *pos) {
 	while(s[i] != 'e') {
 		if(s[i] == 'l') {
 			if(index % 2 == 0) {
-				curr = insert_list(&res,NULL,s,&i);
+				curr = insert_list(&res,nullptr,s,&i);
 				index = (index + 1) % 2;
 			}
 			else {
@@ -176,7 +174,7 @@ dict bdecd(std::string s, size_t *pos) {
 		}
 		else if(s[i] == 'i') {
 			if(index % 2 == 0) {
-				curr = insert_int(&res,NULL,s,&i);
+				curr = insert_int(&res,nullptr,s,&i);
 				index = (index + 1) % 2;
 			}
 			else {
@@ -186,7 +184,7 @@ dict bdecd(std::string s, size_t *pos) {
 		}
 		else if(isnum(s[i])) {
 			if(index % 2 == 0) {
-				curr = insert_string(&res,NULL,s,&i);
+				curr = insert_string(&res,nullptr,s,&i);
 				index = (index + 1) % 2;
 			}
 			else {
@@ -194,9 +192,21 @@ dict bdecd(std::string s, size_t *pos) {
 				index = (index + 1) % 2;
 			}
 		}
+		else if(s[i] == 'd') {
+			if(index % 2 == 0) {
+				curr = insert_dict(&res,nullptr,s,&i);
+				index = (index + 1) % 2;
+			}
+			else {
+				insert_dict(&res,&curr,s,&i);
+				index = (index + 1) % 2;
+			}
+
+		}
 		if(i >= s.length()-1)
 			break;
 	}
+	*pos = i+1;
 	return res;
 }
 
@@ -215,13 +225,18 @@ void printlist(std::vector<l_item> l) {
 }
 void printdict(dict d) {
 	std::map<l_item,l_item>::iterator item;
+	std::cout << '{' << std::endl;
 	for( item = d.begin(); item != d.end(); item++) {
 		std::cout << std::get<std::string>(item->first.data) << " : " ;
 		if(item->second.type == 's') {
 			std::cout << std::get<std::string>(item->second.data) << std::endl ;
 		}
-		else {
+		else if (item->second.type == 'i') {
 			std::cout << std::get<int>(item->second.data) << std::endl ;
 		}
+		else 
+			printdict(std::get<dict>(item->second.data));
+		
 	}
+	std::cout << '}' << std::endl;
 }
