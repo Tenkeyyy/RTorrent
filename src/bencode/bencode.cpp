@@ -1,0 +1,63 @@
+#include "bencode.hpp"
+#include <string>
+
+std::string bencs(l_item item) {
+	if(item.type != 's') {
+		std::cout << "Wrong type\n";
+		abort();
+	}
+	std::string s = std::get<std::string>(item.data);
+	int x = s.size();
+	return (std::to_string(x) + ':' + s);
+}
+
+std::string benci(l_item item) {
+	if(item.type != 'i') {
+		std::cout << "Wrong type!\n";
+		abort();
+	}
+	int x = std::get<int>(item.data);
+	return 'i' + std::to_string(x) + 'e';
+}
+
+std::string bencl(l_item item) {
+	if(item.type != 'l') {
+		std::cout << "Wrong type!\n";
+		abort();
+	}
+	std::vector<l_item> v = std::get<std::vector<l_item>>(item.data);
+	std::string res = "l" ;
+	for(size_t i = 0 ; i < v.size(); ++i) {
+		if(v[i].type == 'i') {
+			res += benci(v[i]);
+		}
+		else if(v[i].type == 's') {
+			res += bencs(v[i]);
+		}
+		else if(v[i].type == 'l') {
+			res += bencl(v[i]);
+		}
+	}
+	return res + 'e';
+}
+
+std::string benc(l_item item) {
+	if(item.type == 'i')
+		return benci(item);
+	else if(item.type == 's')
+		return bencs(item);
+	else
+		return bencl(item);
+}
+
+std::string bencd(dict d) {
+	std::string res = "d";
+	std::map<l_item,l_item>::iterator item;
+	for(item = d.begin(); item != d.end() ; ++item) {
+		if(item->second.type == 's' ||item->second.type == 'i' ||item->second.type == 'l' )
+			res += benc(item->first) + benc(item->second);
+		else
+			res += bencs(item->first) + bencd(std::get<dict>(item->second.data));
+	}
+	return res + 'e';
+}
