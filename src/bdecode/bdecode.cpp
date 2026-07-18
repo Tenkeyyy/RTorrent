@@ -223,6 +223,7 @@ void printlist(std::vector<l_item> l) {
 		}
 	}
 }
+
 void printdict(dict d) {
 	std::map<l_item,l_item>::iterator item;
 	std::cout << '{' << std::endl;
@@ -239,4 +240,20 @@ void printdict(dict d) {
 		
 	}
 	std::cout << '}' << std::endl;
+}
+
+l_item getItem(dict d, l_item key) {
+	return d.at(key);
+}
+
+l_item getItem(dict d, std::string k) {
+	std::map<l_item,l_item>::iterator item;
+	for(item = d.begin(); item != d.end(); ++item) {
+		if(std::get<std::string>(item->first.data) == k) {
+			return item->second;
+		}
+	}
+	l_item l ;
+	l.type = 'e';
+	return l;
 }
