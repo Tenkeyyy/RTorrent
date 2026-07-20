@@ -92,7 +92,6 @@ l_item insert_string(dict *d, l_item *i, const std::string& s, size_t *pos) {
 	else {
 		(*d)[*i] = item;
 		*i = item;
-		std::cout << "Inserted a value\n";
 	}
 	return item;
 }
@@ -303,10 +302,17 @@ std::string bencd(dict d) {
 	std::string res = "d";
 	std::map<l_item,l_item>::iterator item;
 	for(item = d.begin(); item != d.end() ; ++item) {
-		if(item->second.type == 's' ||item->second.type == 'i' ||item->second.type == 'l' )
+		if(item->second.type == 's' || item->second.type == 'i' || item->second.type == 'l' )
 			res += benc(item->first) + benc(item->second);
 		else
 			res += bencs(item->first) + bencd(std::get<dict>(item->second.data));
 	}
 	return res + 'e';
 }
+
+std::string dtoh(dict d) {
+	SHA1 sha;
+	sha.update(bencd(d));
+	return sha.final();
+}
+
