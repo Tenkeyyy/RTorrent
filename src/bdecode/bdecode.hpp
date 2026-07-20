@@ -1,3 +1,5 @@
+#ifndef BDECODE_HPP
+#define BDECODE_HPP
 #include <algorithm>
 #include <cctype>
 #include <string>
@@ -17,3 +19,4 @@ void printlist(std::vector<l_item> l);
 std::vector<l_item> bdecl(const std::string& s, size_t *pos);
 dict bdecd(const std::string& s, size_t *pos);
 void printdict(dict d);
+#endif
