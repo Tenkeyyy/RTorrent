@@ -210,7 +210,7 @@ dict bdecd(const std::string& s, size_t *pos) {
 	return res;
 }
 
-void printlist(std::vector<l_item> l) {
+void printlist(list l) {
 	for(size_t i = 0 ; i < l.size() ; ++i) {
 		if(l[i].type == 'l') {
 			printlist(std::get<std::vector<l_item>>(l[i].data));
@@ -256,4 +256,19 @@ l_item getItem(dict d, std::string k) {
 	l_item l ;
 	l.type = 'e';
 	return l;
+}
+
+void printItem(list l) {
+	printlist(l);
+}
+void printItem(dict d) {
+	printdict(d);
+}
+void printItem(l_item item) {
+	if(item.type == 's') {
+		std::cout << std::get<std::string>(item.data) << std::endl;
+	}
+	if(item.type == 'i') {
+		std::cout << std::get<int>(item.data) << std::endl;
+	}
 }

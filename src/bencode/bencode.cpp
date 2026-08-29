@@ -67,3 +67,16 @@ std::string dtoh(dict d) {
 	return sha.final();
 }
 
+std::string stoh(std::string s) {
+	SHA1 sha;
+	sha.update(s);
+	return sha.final();
+}
+
+std::vector<std::string> splitBySize(std::string s, size_t size) {
+	std::vector<std::string> res;
+	for(size_t i = 0; i < s.length(); i += size) {
+		res.push_back(s.substr(i, size));
+	}
+	return res;
+}

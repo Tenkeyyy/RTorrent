@@ -24,4 +24,5 @@ struct l_item {
 
 typedef std::variant<int, std::string, std::vector<l_item>> item_t;
 typedef std::map<l_item, l_item> dict;
+typedef std::vector<l_item> list;
 #endif

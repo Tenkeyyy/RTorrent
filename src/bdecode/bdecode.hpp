@@ -9,7 +9,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <map>
-#include "../types.hpp"
+#include "../lib/types.hpp"
 
 void insert_int(std::vector<l_item> *dest, const std::string& s, size_t *pos);
 void insert_string(std::vector<l_item> *dest, const std::string& s, size_t *pos);
@@ -19,4 +19,7 @@ void printlist(std::vector<l_item> l);
 std::vector<l_item> bdecl(const std::string& s, size_t *pos);
 dict bdecd(const std::string& s, size_t *pos);
 void printdict(dict d);
+void printItem(list l);
+void printItem(dict d);
+void printItem(l_item item);
 #endif
