@@ -2,4 +2,4 @@
 
 g++ -Wall -Wextra -o main ./src/bdecode/bdecode.cpp ./src/bencode/bencode.cpp ./src/main.cpp
 
-./main
+./main sample.torrent

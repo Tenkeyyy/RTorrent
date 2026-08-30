@@ -14,8 +14,6 @@ bool isnum(char c) {
 	return false;
 }
 
-#define BENCODE_ERR -1
-
 std::string bdecs(const std::string& s, size_t *pos) {
 	std::string chars = "";
 	size_t i = *pos;
@@ -46,14 +44,11 @@ int bdeci(const std::string& s, size_t *pos) {
 		nums += s[i];
 		if(!isnum(s[i])) {
 			std::cout << "Not a valid bencoding\n";
-			errno = BENCODE_ERR;
 			return 0;
 		}
 		++i;
 		if(i == s.length()) {
 			std::cout << "Not a valid bencoding\n";
-			errno = BENCODE_ERR;
-			return 0;
 		}
 	}
 	*pos = i + 1;
@@ -261,9 +256,11 @@ l_item getItem(dict d, std::string k) {
 void printItem(list l) {
 	printlist(l);
 }
+
 void printItem(dict d) {
 	printdict(d);
 }
+
 void printItem(l_item item) {
 	if(item.type == 's') {
 		std::cout << std::get<std::string>(item.data) << std::endl;
