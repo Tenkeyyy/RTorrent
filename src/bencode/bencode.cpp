@@ -1,5 +1,6 @@
 #include "bencode.hpp"
 
+
 std::string bencs(l_item item) {
 	if(item.type != 's') {
 		std::cout << "Wrong type\n";
