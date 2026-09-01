@@ -15,34 +15,18 @@ int main(int argc, char** argv) {
 		throw std::exception();
 	}
 
-	std::ifstream torrent(PATH, std::ios::binary);
-
-	if(!torrent.is_open()) {
-		throw std::runtime_error("Could not open file");
-	}
-
-	std::ostringstream content;
-	content << torrent.rdbuf();
-
-	std::string s = content.str();
-
-	size_t pos = 0;
-	dict d = bdecd(s, &pos);
-
-	dict info = std::get<dict>(getItem(d, "info").data);
-
-	std::string hash = dtoh(info);
+	std::string hex_hash = getinfo_hash(PATH);
 
 	httplib::Server serv;
 
 	const char ip[] = "0.0.0.0";
 	const int port = std::stoi(argv[1]);
 
-	serv.Get("/announce",[hash](const httplib::Request &req, httplib::Response &res){
+	serv.Get("/announce",[hex_hash](const httplib::Request &req, httplib::Response &res){
 		if(req.method == "GET") {
 			std::string info_hash = req.get_param_value("info_hash");
 			std::cout << "info_hash: " << info_hash << std::endl;
-			if(info_hash == hash)
+			if(info_hash == hex_hash)
 				std::cout << "LOL\n";
 			std::string peer_id = req.get_param_value("peer_id");
 			std::cout << "peer_id: " << peer_id << std::endl;

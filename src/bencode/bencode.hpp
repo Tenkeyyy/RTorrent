@@ -101,4 +101,5 @@ std::vector<std::string> splitBySize(std::string s, size_t size) {
 	return res;
 }
 
+
 #endif

@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <map>
 #include "../lib/types.hpp"
+#include "../bencode/bencode.hpp"
 
 void insert_int(std::vector<l_item> *dest, const std::string& s, size_t *pos);
 void insert_string(std::vector<l_item> *dest, const std::string& s, size_t *pos);
@@ -251,11 +252,11 @@ void printdict(dict d) {
 	std::cout << '}' << std::endl;
 }
 
-l_item getItem(dict d, l_item key) {
+inline l_item getItem(dict d, l_item key) {
 	return d.at(key);
 }
 
-l_item getItem(dict d, std::string k) {
+inline l_item getItem(dict d, std::string k) {
 	std::map<l_item,l_item>::iterator item;
 	for(item = d.begin(); item != d.end(); ++item) {
 		if(std::get<std::string>(item->first.data) == k) {
@@ -267,20 +268,40 @@ l_item getItem(dict d, std::string k) {
 	return l;
 }
 
-void printItem(list l) {
+inline void printItem(list l) {
 	printlist(l);
 }
 
-void printItem(dict d) {
+inline void printItem(dict d) {
 	printdict(d);
 }
 
-void printItem(l_item item) {
+inline void printItem(l_item item) {
 	if(item.type == 's') {
 		std::cout << std::get<std::string>(item.data) << std::endl;
 	}
 	if(item.type == 'i') {
 		std::cout << std::get<int>(item.data) << std::endl;
 	}
+}
+
+inline std::string getinfo_hash(const std::string path) {
+	std::ifstream torrent(path, std::ios::binary);
+
+	if(!torrent.is_open()) {
+		throw std::runtime_error("Could not open file");
+	}
+
+	std::ostringstream content;
+	content << torrent.rdbuf();
+
+	std::string s = content.str();
+
+	size_t pos = 0;
+	dict d = bdecd(s, &pos);
+
+	dict info = std::get<dict>(getItem(d, "info").data);
+
+	std::string hash = dtoh(info);
 }
 #endif
