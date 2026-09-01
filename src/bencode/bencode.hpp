@@ -1,6 +1,9 @@
 #ifndef BENCODE_HPP
 #define BENCODE_HPP
 #include <cctype>
+#include <exception>
+#include <fstream>
+#include <stdexcept>
 #include <string>
 #include <vector>
 #include <string>
@@ -9,6 +12,7 @@
 #include <map>
 #include "../lib/types.hpp"
 #include "../lib/sha1.hpp"
+#include "../bdecode/bdecode.hpp"
 std::string bencd(dict d);
 std::string benc(l_item item);
 std::string bencl(l_item item);
@@ -101,5 +105,39 @@ std::vector<std::string> splitBySize(std::string s, size_t size) {
 	return res;
 }
 
+std::string dictToUrl(dict d, std::string endpoint) {
+	std::string res = endpoint + '?';
+
+	for(dict::iterator x = d.begin(); x != d.end(); ++x) {
+		res += std::get<std::string>(x->first.data) + '=';
+		if (x->second.type == 'd')
+			res += dtoh(std::get<dict>(x->second.data));
+		else if(x->second.type == 's')
+			res += std::get<std::string>(x->second.data);
+		else if(x->second.type == 'i')
+			res += std::get<int>(x->second.data);
+	}
+
+	return res;
+}
+
+std::string fileToUrl(const std::string path, const std::string endpoint) {
+	std::ifstream torrent(path, std::ios::binary);
+	if(!torrent.is_open()) {
+		throw std::runtime_error("Could not open file");
+	}
+
+	std::ostringstream content;
+	content << torrent.rdbuf();
+
+	std::string s = content.str();
+
+	size_t pos = 0;
+
+	dict d = bdecd(s,&pos);
+
+	return dictToUrl(d, endpoint);
+
+}
 
 #endif
