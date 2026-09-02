@@ -1,6 +1,7 @@
 #ifndef BDECODE_HPP
 #define BDECODE_HPP
 #include <algorithm>
+#include <cassert>
 #include <cctype>
 #include <string>
 #include <variant>
@@ -23,6 +24,7 @@ void printdict(dict d);
 void printItem(list l);
 void printItem(dict d);
 void printItem(l_item item);
+inline std::string getinfo_hash(const std::string path);
 bool isnum(char c) {
 	if( c == '0' || c == '1' || c == '2' || c == '3' || c == '4' || c == '5' || c == '6' || c == '7' || c == '8' || c == '9')
 		return true;
@@ -285,6 +287,18 @@ inline void printItem(l_item item) {
 	}
 }
 
+std::string dtoh(dict d) {
+	SHA1 sha;
+	sha.update(bencd(d));
+	return sha.final();
+}
+
+std::string stoh(std::string s) {
+	SHA1 sha;
+	sha.update(s);
+	return sha.final();
+}
+
 inline std::string getinfo_hash(const std::string path) {
 	std::ifstream torrent(path, std::ios::binary);
 
@@ -302,6 +316,43 @@ inline std::string getinfo_hash(const std::string path) {
 
 	dict info = std::get<dict>(getItem(d, "info").data);
 
-	std::string hash = dtoh(info);
+	return dtoh(info);
+
+}
+
+std::string dictToUrl(dict d, std::string endpoint) {
+	std::string res = endpoint + '?';
+
+	dict info = std::get<dict>(getItem(d, "info").data);
+	std::string info_hash = dtoh(info);
+	std::string left = std::to_string(std::get<int>(getItem(info, "piece length").data));
+	std::string peer_id = "-CC0001-CCCC-CC0001-";
+	std::string port = "8080";
+	std::string uploaded = "0";
+	std::string downloaded = "0";
+
+	res = res + "info_hash=" + info_hash + "&peer_id=" + peer_id + "&port=" + port + "&uploaded=" + uploaded;
+	res = res + "&downloaded=" + downloaded + "&left=" + left + "&compact=1";
+
+	return res;
+}
+
+std::string fileToUrl(const std::string path, const std::string endpoint) {
+	std::ifstream torrent(path, std::ios::binary);
+	if(!torrent.is_open()) {
+		throw std::runtime_error("Could not open file");
+	}
+
+	std::ostringstream content;
+	content << torrent.rdbuf();
+
+	std::string s = content.str();
+
+	size_t pos = 0;
+
+	dict d = bdecd(s,&pos);
+
+	return dictToUrl(d, endpoint);
+
 }
 #endif

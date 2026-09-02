@@ -1,11 +1,12 @@
-#include "./bencode/bencode.hpp"
-#include "./bdecode/bdecode.hpp"
-#include "./tracker/tracker.hpp"
+#include "bencode/bencode.hpp"
+#include "bdecode/bdecode.hpp"
+#include "tracker/tracker.hpp"
 #include <exception>
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
 #include <unordered_map>
+#include "lib/conversion.hpp"
 
 #define PATH "sample.torrent"
 
